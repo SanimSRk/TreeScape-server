@@ -31,7 +31,7 @@ async function run() {
     const treeScopData = client.db('TreeScops');
     const userCollection = treeScopData.collection('Users');
     const addProductCollection = treeScopData.collection('Store-product');
-
+    const myCardProductCollection = treeScopData.collection('Card-product');
     //-------------- everone access data sction ---------------------
 
     app.post('/users', async (req, res) => {
@@ -56,9 +56,22 @@ async function run() {
       const result = await addProductCollection.find().toArray();
       res.send(result);
     });
-
+    app.get('/user-searchData', async (req, res) => {
+      const qurey = { commonName: { $regx: req.query.search } };
+      const result = await addProductCollection.find(qurey).toArray();
+      res.send(result);
+    });
+    app.post('/addTo-cards', async (req, res) => {
+      const productInf = req.body;
+      const result = await myCardProductCollection.insertOne(productInf);
+      res.send(result);
+    });
     //----------------user data handiling section ---------------------------------
-
+    app.get('/my-products', async (req, res) => {
+      const qurey = { email: req?.query?.email };
+      const result = await myCardProductCollection.find(qurey).toArray();
+      res.send(result);
+    });
     // -----------this is admin data handiling section -------------------
 
     app.post('/add-products', async (req, res) => {
