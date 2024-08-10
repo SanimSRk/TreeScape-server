@@ -1,5 +1,5 @@
 const express = require('express');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
 require('dotenv').config();
 const app = express();
@@ -72,6 +72,28 @@ async function run() {
       const result = await myCardProductCollection.find(qurey).toArray();
       res.send(result);
     });
+    app.delete('/delete-myProducts/:id', async (req, res) => {
+      const id = req.params.id;
+      const qurey = { _id: new ObjectId(id) };
+      const result = await myCardProductCollection.deleteOne(qurey);
+      res.send(result);
+    });
+
+    app.get('/totle-products', async (req, res) => {
+      const qurey = { email: req.query.email };
+      const Counts = await myCardProductCollection.estimatedDocumentCount(
+        qurey
+      );
+      res.send({ ProductCount: Counts });
+      const totle = await myCardProductCollection.find(qurey).toArray();
+      const pay = totle?.reduce(
+        (payment, currentValue) => payment + parseFloat(currentValue.price),
+        0
+      );
+      console.log(pay);
+      res.send({ totlePayment: pay });
+    });
+
     // -----------this is admin data handiling section -------------------
 
     app.post('/add-products', async (req, res) => {
