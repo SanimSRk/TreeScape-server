@@ -1,8 +1,8 @@
 const express = require('express');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const cors = require('cors');
 require('dotenv').config();
 const app = express();
+const cors = require('cors');
 const port = process.env.PORT || 5000;
 
 app.use(express.json());
@@ -81,17 +81,8 @@ async function run() {
 
     app.get('/totle-products', async (req, res) => {
       const qurey = { email: req.query.email };
-      const Counts = await myCardProductCollection.estimatedDocumentCount(
-        qurey
-      );
-      res.send({ ProductCount: Counts });
-      const totle = await myCardProductCollection.find(qurey).toArray();
-      const pay = totle?.reduce(
-        (payment, currentValue) => payment + parseFloat(currentValue.price),
-        0
-      );
-      console.log(pay);
-      res.send({ totlePayment: pay });
+      const Counts = await myCardProductCollection.find(qurey).toArray();
+      res.send(Counts);
     });
 
     // -----------this is admin data handiling section -------------------
@@ -102,6 +93,53 @@ async function run() {
       res.send(result);
     });
 
+    app.get('/all-userData', async (req, res) => {
+      const result = await userCollection.find().toArray();
+      res.send(result);
+    });
+    app.delete('/user-delete/:id', async (req, res) => {
+      const id = req.params.id;
+      const qurey = { _id: new ObjectId(id) };
+      const result = await userCollection.deleteOne(qurey);
+      res.send(result);
+    });
+    app.get('/manageProducts', async (req, res) => {
+      const result = await addProductCollection.find().toArray();
+      res.send(result);
+    });
+    app.get('/update-deatils/:id', async (req, res) => {
+      const id = req.params.id;
+      const qurey = { _id: new ObjectId(id) };
+      const result = await addProductCollection.findOne(qurey);
+      res.send(result);
+    });
+
+    app.put('/updates-products/:id', async (req, res) => {
+      const id = req.params.id;
+      const updateInfo = req.body;
+      const qurey = { _id: new ObjectId(id) };
+      const updatesDc = {
+        $set: {
+          commonName: updateInfo.commonName,
+          scientificName: updateInfo.scientificName,
+          height: updateInfo.height,
+          price: updateInfo.price,
+          lifespan: updateInfo.lifespan,
+          habitat: updateInfo.habitat,
+          descriptiont: updateInfo.descriptiont,
+          image: updateInfo.image,
+        },
+      };
+      const result = await addProductCollection.updateOne(qurey, updatesDc);
+      res.send(result);
+    });
+
+    app.delete('/delete-product/:id', async (req, res) => {
+      const id = req.params.id;
+      const qurey = { _id: new ObjectId(id) };
+      const result = await addProductCollection.deleteOne(qurey);
+      res.send(result);
+    });
     // await client.db('admin').command({ ping: 1 });
     console.log(
       'Pinged your deployment. You successfully connected to MongoDB!'
