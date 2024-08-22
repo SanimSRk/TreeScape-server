@@ -52,8 +52,18 @@ async function run() {
       res.send(result);
     });
 
-    app.get('/products-shows', async (req, res) => {
-      const result = await addProductCollection.find().toArray();
+    app.get('/products-paginagtion', async (req, res) => {
+      const pages = parseInt(req.query.page);
+      const size = parseInt(req.query.size);
+      const result = await addProductCollection
+        .find()
+        .skip(pages * size)
+        .limit(size)
+        .toArray();
+      res.send(result);
+    });
+    app.get('/Product-home', async (req, res) => {
+      const result = await addProductCollection.find().limit(9).toArray();
       res.send(result);
     });
     app.get('/user-searchData', async (req, res) => {
@@ -65,6 +75,11 @@ async function run() {
       const productInf = req.body;
       const result = await myCardProductCollection.insertOne(productInf);
       res.send(result);
+    });
+
+    app.get('/count-pages', async (req, res) => {
+      const result = await addProductCollection.estimatedDocumentCount();
+      res.send({ count: result });
     });
     //----------------user data handiling section ---------------------------------
     app.get('/my-products', async (req, res) => {
