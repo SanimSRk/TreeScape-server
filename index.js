@@ -30,7 +30,7 @@ async function run() {
     // Send a ping to confirm a successful connection
     const treeScopData = client.db('TreeScops');
     const userCollection = treeScopData.collection('Users');
-    const addProductCollection = treeScopData.collection('Store-product');
+    const addProductCollection = treeScopData.collection('store-product');
     const myCardProductCollection = treeScopData.collection('Card-product');
     //-------------- everone access data sction ---------------------
 
@@ -67,7 +67,7 @@ async function run() {
       res.send(result);
     });
     app.get('/user-searchData', async (req, res) => {
-      const qurey = { commonName: { $regx: req.query.search } };
+      const qurey = { commonName: { $regex: req.query.search, $options: 'i' } };
       const result = await addProductCollection.find(qurey).toArray();
       res.send(result);
     });
@@ -81,6 +81,29 @@ async function run() {
       const result = await addProductCollection.estimatedDocumentCount();
       res.send({ count: result });
     });
+
+    app.get('/scientfic-name', async (req, res) => {
+      const qurey = { scientificName: req.query.scient };
+      const result = await addProductCollection.find(qurey).toArray();
+      res.send(result);
+    });
+    app.get('/height-range', async (req, res) => {
+      const main = parseFloat(req.query.main);
+      const max = parseFloat(req.query.max);
+      const qurey = { height: { $gte: main, $lte: max } };
+      const result = await addProductCollection.find(qurey).toArray();
+
+      res.send(result);
+    });
+    app.get('/prices-range', async (req, res) => {
+      const main = parseFloat(req.query.main);
+      const max = parseFloat(req.query.max);
+      const qurey = { price: { $gte: main, $lte: max } };
+      const result = await addProductCollection.find(qurey).toArray();
+
+      res.send(result);
+    });
+
     //----------------user data handiling section ---------------------------------
     app.get('/my-products', async (req, res) => {
       const qurey = { email: req?.query?.email };
